@@ -1893,4 +1893,9 @@ with gr.Blocks(title="Analysis System", css=custom_css) as demo:
 
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(
+        share=True,
+        inbrowser=True,
+        title="Data Quality Assessment Platform",
+        favicon_path=None
+    )
