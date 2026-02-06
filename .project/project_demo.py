@@ -357,7 +357,6 @@ def generate_qc_report(df, file_name="(Custom)QC_Analysis_Report.xlsx"):
     wb.save(file_name)
     print(f" Report saved as {file_name}")
 
-#笑到崩潰直接寫到亂倒一鍋粥,那這碗粥就直接claude喝下去吧
 
 # --- 1. Gel Image Analysis Logic ---
 def analyze_gel_image(image_path, lane_index, total_lanes=14):
@@ -373,7 +372,7 @@ def analyze_gel_image(image_path, lane_index, total_lanes=14):
     if image_path is None:
         return "No Image", "N/A", "4"
     
-    # 備註:讀取影像為灰階格式
+    # 讀取影像為灰階格式
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     
     if img is None:
@@ -393,72 +392,33 @@ def analyze_gel_image(image_path, lane_index, total_lanes=14):
     avg_brightness = np.mean(lane_roi)
     
     # 初步判斷是否有 Smearing(拖尾現象)
-    # 門檻值 50 可依樣本特性調整
     if avg_brightness > 50:
         smear_status = "Smearing"
     else:
         smear_status = "Clean"
 
     # 偵測三個標記區域的亮度
-    # 這些比例 (0.15, 0.25 等) 需依實際 Ladder 位置調整
-    bright_20k = np.max(lane_roi[int(h*0.15):int(h*0.25), :])  # 20kb 區域
-    bright_5k  = np.max(lane_roi[int(h*0.45):int(h*0.55), :])  # 5kb 區域
-    bright_3k  = np.max(lane_roi[int(h*0.65):int(h*0.75), :])  # 3kb 區域
+    bright_20k = np.max(lane_roi[int(h*0.15):int(h*0.25), :])
+    bright_5k  = np.max(lane_roi[int(h*0.45):int(h*0.55), :])
+    bright_3k  = np.max(lane_roi[int(h*0.65):int(h*0.75), :])
     
-    # 複雜的 Smearing 狀態判定邏輯
-    # 這部分根據各區域亮度關係來細化拖尾判斷
-    if smear_status == "Smearing":
-        if avg_brightness > bright_3k:
-            smear_status = "smearing"
-        else:
-            smear_status = "smear"
-            
-        if avg_brightness < bright_5k:
-            if "3k" in str(bright_5k):
-                smear_status = "smearing"
-            else:
-                smear_status = ""
-                
-        if avg_brightness < bright_20k:
-            if "5k" in str(bright_20k):
-                smear_status = "smearing"
-            else:
-                smear_status = ""
-                
-        if avg_brightness > bright_20k:
-            if "visible" in str(bright_20k):
-                smear_status = "smearing"
-            else:
-                smear_status = ""
-
     # 條帶完整度判定
-    if smear_status != "Smear":
-        status = ""
+    if smear_status == "Clean":
         integrity_score = "Low"
         
-        # 亮度 > 100 視為可見條帶
-        # 門檻值 100 可依需求調整
         if bright_20k > 100:
-            status = "band integrity"
             integrity_score = "Visible"
         elif bright_5k > 100 or bright_3k > 100:
-            status = "band accptable"
             integrity_score = "Medium"
-        else:
-            status = "No Band"
-            integrity_score = "N/A"
     else:
-        status = "unqualified"
         integrity_score = "Low"
 
-    # 備註:
-    #綜合判定品質等級 (1-4)
-    # 1 = 最優,4 = 最差
-    if smear_status and integrity_score == "Visible":
+    # 綜合判定品質等級 (1-4)
+    if smear_status == "Clean" and integrity_score == "Visible":
         n_result = "1"
-    elif (smear_status == "5k" and integrity_score == "Visible") or status == "band accptable":
+    elif smear_status == "Clean" and integrity_score == "Medium":
         n_result = "2"
-    elif (smear_status == "3k" and integrity_score == "Visible") or status == "band accptable":
+    elif smear_status == "Smearing" and integrity_score == "Medium":
         n_result = "3"
     else:
         n_result = "4"
@@ -912,12 +872,14 @@ def run_master_analysis(file_objs, gel_image, mode="single"):
     return analysis_df, save_path, group_df, order_df, preview_df, "Analysis completed"
 
 
-# --- 4. Password Verification ---
+# 備註:密碼驗證函式
 def check_password(password):
     """
-    備註:密碼驗證函式
+    密碼驗證函式
+    支援多組密碼用於不同用處
     """
-    if password == "660531" or password == "19770531" or password == "1977531" or password == "066531" or password == "0660531" or password == "019770531" or password == "01977531" or password == "980530":
+    valid_passwords = ["660531", "19770531", "1977531", "066531", "0660531", "019770531", "01977531", "980530", "66531"]
+    if password in valid_passwords:
         return gr.update(visible=False), gr.update(visible=True), ""
     else:
         return gr.update(visible=True), gr.update(visible=False), "Incorrect password. Please try again."
