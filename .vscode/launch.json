@@ -6,7 +6,10 @@
     "configurations": [
 
         {
-            "n
-        }
+            "name": "PowerShell Interactive Session",
+            "type": "PowerShell",
+            "request": "launch",
+            "cwd": "${cwd}"
+        },
     ]
 }
