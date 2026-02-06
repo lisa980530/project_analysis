@@ -10,5 +10,10 @@
         "denyWrite": []
     },
     "terminal.integrated.defaultProfile.windows": "Git Bash",
-    "workbench.browser.dataStorage": "global"
+    "workbench.browser.dataStorage": "global",
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
