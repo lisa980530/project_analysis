@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"name": "models",
+			"path": "../../models"
+		},
+		{
+			"name": "project_analysis",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"terminal.integrated.allowInUntrustedWorkspace": true,
+		"chat.tools.terminal.sandbox.macFileSystem": {
+			"denyRead": [],
+			"allowWrite": [
+				"."
+			],
+			"denyWrite": []
+		},
+		"terminal.integrated.defaultProfile.windows": "Git Bash",
+		"workbench.browser.dataStorage": "global"
+	}
+}
